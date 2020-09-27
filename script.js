@@ -59,8 +59,9 @@ const inputHandler = (e) => { //Отслеживаем события на из�
   Tritemiy.innerHTML = `Тритемий: ${encryptionTritemiy(input.value)}`
   Belazo.innerHTML = `Белазо: ${encryptionBelazo(input.value)}`
   Visioner.innerHTML = `Виженер: ${encryptionVisioner(input.value)}`
-
 }
+
+input.oninput = inputHandler
 
 const normalizeText = (text) => text.split('') // Приводим текст к нужному формату
   .map(char => {
@@ -72,7 +73,7 @@ const normalizeText = (text) => text.split('') // Приводим текст к
 
 const encryptRule = (encryptFunc) => (string) => { // Здесь мы создаем правило для шифрования. Причем правило задается вне функции.
   return string.split('')
-    .map((char, index) => isNumber(char) ? char : encryptFunc(char, index))
+    .map((char, index) => isNumber(char) ? char : encryptFunc(char, index, string))
     .join('')
 }
 
@@ -96,38 +97,21 @@ belazoMatrix.unshift(alphabetMatrix[0])
 
 // Шифр Виженера
 
-console.log(alphabetMatrix)
 const secretChar = 'Л'
 
-const visionerEncryptRule = (char, index, text) => {
-  if (index === 0) {
-    return alphabetMatrix[ALPHABET[indexOf(secretChar)]][alphabetMatrix[0].indexOf(char)]
-  }
-  return alphabetMatrix[ALPHABET[indexOf(text[index - 1])]][alphabetMatrix[0].indexOf(char)]
-}
+const visionerEncryptRule = (char, index, normalizedText) => (
+  alphabetMatrix[alphabetMatrix[0].indexOf(index === 0 ? secretChar : normalizedText[index - 1])][alphabetMatrix[0].indexOf(char)]
+)
 
-const encryptionVisioner = text => compose(encryptRule((char, index) => text => visionerEncryptRule(char, index)(text)), normalizeText)(text)
+// Функции рендера
+
+const encryptionVisioner = text => compose(encryptRule(visionerEncryptRule), normalizeText)(text)
 
 const encryptionTritemiy = text => compose(encryptRule((char, index) => alphabetMatrix[ALPHABET.indexOf(char)][Math.abs((ALPHABET.indexOf(char) + index - 1) % ALPHABET.length)]), normalizeText)(text)
 
-const encryptionBelazo = text => compose(encryptRule((char, index) => belazoMatrix[index % 4 + 1][belazoMatrix[0].indexOf(char)]), normalizeText)(text)
+const encryptionBelazo = text => compose(encryptRule((char, index) => belazoMatrix[index % belazoKey.length + 1][belazoMatrix[0].indexOf(char)]), normalizeText)(text)
 
-
-
-
-
- 
-
-
-
-
-
-
-
-
-
-input.oninput = inputHandler
-// Ниже создаем функции шифрования
+// Лабораторная 1
 const encryptionCaesar = (text) => compose(encryptRule(char => ALPHABET[(ALPHABET.indexOf(char) + 3) % ALPHABET.length]), normalizeText)(text)
 
 const encryptionATBASH = (text) => compose(encryptRule(char => ALPHABET.split('').reverse()[ALPHABET.indexOf(char)]), normalizeText)(text)
