@@ -16,7 +16,7 @@ const polibiyMap = {}
 
 function polybiyEncryption() { //Собираем объект для Квадрата Полибия
   const LEN = 6
-  
+
   let i = 1
 
   let j = 1
@@ -56,9 +56,11 @@ const inputHandler = (e) => { //Отслеживаем события на из�
   // unCaesar.innerHTML = `Расшифровка Цезарь: ${unEncryptionCaesar(input.value)}`
   // unATBASH.innerHTML = `Расшифровка АТБАШ: ${unEncryptionATBASH(input.value)}`
 
-  Tritemiy.innerHTML = `Тритемий: ${encryptionTritemiy(input.value)}`
-  Belazo.innerHTML = `Белазо: ${encryptionBelazo(input.value)}`
-  Visioner.innerHTML = `Виженер: ${encryptionVisioner(input.value)}`
+  // Tritemiy.innerHTML = `Тритемий: ${encryptionTritemiy(input.value)}`
+  // Belazo.innerHTML = `Белазо: ${encryptionBelazo(input.value)}`
+  // Visioner.innerHTML = `Виженер: ${encryptionVisioner(input.value)}`
+
+  Playfair.innerHTML = ` Плэйфер: ${encriptionPlayfair(input.value)}`
 }
 
 input.oninput = inputHandler
@@ -76,6 +78,8 @@ const encryptRule = (encryptFunc) => (string) => { // Здесь мы созда
     .map((char, index) => isNumber(char) ? char : encryptFunc(char, index, string))
     .join('')
 }
+
+
 
 // Лабораторная 2
 // Шифр Тритемия
@@ -103,7 +107,64 @@ const visionerEncryptRule = (char, index, normalizedText) => (
   alphabetMatrix[alphabetMatrix[0].indexOf(index === 0 ? secretChar : normalizedText[index - 1])][alphabetMatrix[0].indexOf(char)]
 )
 
+// Шифр Плэйфера
+
+const encryptPlayfair = text => {
+  const playfairMatrix = [
+    ['Р', 'Е', 'С', 'П', 'У', 'Б', 'Л', 'И'],
+    ['К', 'А', 'В', 'Г', 'Д', 'Ж', 'З', 'Й'],
+    ['М', 'Н', 'О', 'Т', 'Ф', 'Х', 'Ц', 'Ч'],
+    ['Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я']
+  ]
+
+  const getMatrixIndex = char => {
+    const firstIndex = playfairMatrix.findIndex(item => {
+      return item.includes(char)
+    })
+    return [firstIndex, playfairMatrix[firstIndex].indexOf(char)]
+  }
+
+  const doEncrypt = chars => {
+    const matrixIndexList = chars.split('').map(getMatrixIndex)
+
+    if (matrixIndexList.length === 1) {
+      return playfairMatrix[matrixIndexList[0][0]][(matrixIndexList[0][1] + 1) % 7]
+    }
+
+    const firstCharIndex = matrixIndexList[0]
+
+    const secondCharIndex = matrixIndexList[1]
+
+    const equalsMethods = {
+      nothingEqual: () => playfairMatrix[firstCharIndex[0]][secondCharIndex[1]] + playfairMatrix[secondCharIndex[0]][firstCharIndex[1]],
+      columnsEqual: () => playfairMatrix[(firstCharIndex[0] + 1) % 4][firstCharIndex[1]] + playfairMatrix[(secondCharIndex[0] + 1) % 4][secondCharIndex[1]],
+      rowsEqual: () => playfairMatrix[firstCharIndex[0]][(firstCharIndex[1] + 1) % 8] + playfairMatrix[secondCharIndex[0]][(secondCharIndex[1] + 1) % 8],
+      allEqual: () => playfairMatrix[firstCharIndex[0]][firstCharIndex[1]] + 'Ф' + playfairMatrix[secondCharIndex[0]][secondCharIndex[1]],
+    }
+
+    const binaryEqualsCode = firstCharIndex.map((item, index) => {
+      return item === secondCharIndex[index] 
+    }) 
+
+    return Object.values(equalsMethods)[parseInt(binaryEqualsCode.reduce((p, c) => p + +c, ''),2)]()
+  }
+
+  let result = ''
+
+  for (let i = 0; i < text.length; i++) {
+    if (text[i + 1]) {
+      result += doEncrypt(text[i] + text[i + 1])
+      i++
+    } else {
+      result += doEncrypt(text[i])
+    }
+  }
+  return result
+}
+
 // Функции рендера
+
+const encriptionPlayfair = text => compose(encryptPlayfair, normalizeText)(text)
 
 const encryptionVisioner = text => compose(encryptRule(visionerEncryptRule), normalizeText)(text)
 
