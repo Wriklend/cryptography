@@ -117,7 +117,7 @@ const encryptPlayfair = text => {
     ['Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я']
   ]
 
-  const getMatrixIndex = char => {
+  const getMatrixIndex = char => { //Функция, которая определяет индекс у буквы из текста
     const firstIndex = playfairMatrix.findIndex(item => {
       return item.includes(char)
     })
@@ -125,9 +125,9 @@ const encryptPlayfair = text => {
   }
 
   const doEncrypt = chars => {
-    const matrixIndexList = chars.split('').map(getMatrixIndex)
+    const matrixIndexList = chars.split('').map(getMatrixIndex) // Создаем бинарный массив из индексов
 
-    if (matrixIndexList.length === 1) {
+    if (matrixIndexList.length === 1) { // Если приходит только одна буква (крайняя), то двигаем ее вправо
       return playfairMatrix[matrixIndexList[0][0]][(matrixIndexList[0][1] + 1) % 7]
     }
 
@@ -135,18 +135,21 @@ const encryptPlayfair = text => {
 
     const secondCharIndex = matrixIndexList[1]
 
-    const equalsMethods = {
+    const equalsMethods = { // Это чтобы не хардкодить ифы, все условия забил в объект
       nothingEqual: () => playfairMatrix[firstCharIndex[0]][secondCharIndex[1]] + playfairMatrix[secondCharIndex[0]][firstCharIndex[1]],
       columnsEqual: () => playfairMatrix[(firstCharIndex[0] + 1) % 4][firstCharIndex[1]] + playfairMatrix[(secondCharIndex[0] + 1) % 4][secondCharIndex[1]],
       rowsEqual: () => playfairMatrix[firstCharIndex[0]][(firstCharIndex[1] + 1) % 8] + playfairMatrix[secondCharIndex[0]][(secondCharIndex[1] + 1) % 8],
       allEqual: () => playfairMatrix[firstCharIndex[0]][firstCharIndex[1]] + 'Ф' + playfairMatrix[secondCharIndex[0]][secondCharIndex[1]],
     }
 
-    const binaryEqualsCode = firstCharIndex.map((item, index) => {
-      return item === secondCharIndex[index] 
+    const binaryEqualsCode = firstCharIndex.map((item, index) => { // Создаем двоичный код равенства
+      return item === secondCharIndex[index]         // Например массив [true, false] === '10'
     }) 
 
-    return Object.values(equalsMethods)[parseInt(binaryEqualsCode.reduce((p, c) => p + +c, ''),2)]()
+    //Тут мы преобразуем код равентва в двоичную систему,
+    //Затем парсим в десятичную и вызывает функцию из массива, который получен 
+    //из объекта с равенствами
+    return Object.values(equalsMethods)[parseInt(binaryEqualsCode.reduce((p, c) => p + +c, ''),2)]() 
   }
 
   let result = ''
@@ -159,7 +162,7 @@ const encryptPlayfair = text => {
       result += doEncrypt(text[i])
     }
   }
-  return result
+  return result //Перебираем текст по два символа, кидаем результат
 }
 
 // Функции рендера
