@@ -60,7 +60,8 @@ const inputHandler = (e) => { //Отслеживаем события на из�
   // Belazo.innerHTML = `Белазо: ${encryptionBelazo(input.value)}`
   // Visioner.innerHTML = `Виженер: ${encryptionVisioner(input.value)}`
 
-  Playfair.innerHTML = ` Плэйфер: ${encriptionPlayfair(input.value)}`
+  // Playfair.innerHTML = ` Плэйфер: ${encriptionPlayfair(input.value)}`
+  Shennon.innerHTML = ` Шеннон: ${encriptionShennon(input.value)}`
 }
 
 input.oninput = inputHandler
@@ -78,7 +79,6 @@ const encryptRule = (encryptFunc) => (string) => { // Здесь мы созда
     .map((char, index) => isNumber(char) ? char : encryptFunc(char, index, string))
     .join('')
 }
-
 
 
 // Лабораторная 2
@@ -135,7 +135,7 @@ const encryptPlayfair = text => {
 
     const secondCharIndex = matrixIndexList[1]
 
-    const equalsMethods = { // Это чтобы не хардкодить ифы, все условия забил в объект
+    const equalsMethods = { // Это чтобы не хардкодить ифы, все условия добавим в объект
       nothingEqual: () => playfairMatrix[firstCharIndex[0]][secondCharIndex[1]] + playfairMatrix[secondCharIndex[0]][firstCharIndex[1]],
       columnsEqual: () => playfairMatrix[(firstCharIndex[0] + 1) % 4][firstCharIndex[1]] + playfairMatrix[(secondCharIndex[0] + 1) % 4][secondCharIndex[1]],
       rowsEqual: () => playfairMatrix[firstCharIndex[0]][(firstCharIndex[1] + 1) % 8] + playfairMatrix[secondCharIndex[0]][(secondCharIndex[1] + 1) % 8],
@@ -147,7 +147,7 @@ const encryptPlayfair = text => {
     }) 
 
     //Тут мы преобразуем код равентва в двоичную систему,
-    //Затем парсим в десятичную и вызывает функцию из массива, который получен 
+    //Затем парсим в десятичную и вызываем функцию из массива, который получен 
     //из объекта с равенствами
     return Object.values(equalsMethods)[parseInt(binaryEqualsCode.reduce((p, c) => p + +c, ''),2)]() 
   }
@@ -165,7 +165,19 @@ const encryptPlayfair = text => {
   return result //Перебираем текст по два символа, кидаем результат
 }
 
+// Шифр Шеннона
+
+const shennonEncryptRule = (text) => {
+  const m = text.split('').map(char => ALPHABET.indexOf(char)) //Создаем последовательнсть символов текста
+
+  const k = m.map(m => Math.floor(Math.random() * ALPHABET.length)) //Создаем шифрующую последовательность длины равной m.
+
+  return m.map((m, index) => ALPHABET[m ^ k[index]]).join('') //Выполняем операцию исключающего ИЛИ (m XOR k). И возвращаем результат
+} 
+
 // Функции рендера
+
+const encriptionShennon = text => compose(shennonEncryptRule, normalizeText)(text)
 
 const encriptionPlayfair = text => compose(encryptPlayfair, normalizeText)(text)
 
