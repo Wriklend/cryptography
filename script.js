@@ -61,7 +61,8 @@ const inputHandler = (e) => { //Отслеживаем события на из�
   // Visioner.innerHTML = `Виженер: ${encryptionVisioner(input.value)}`
 
   // Playfair.innerHTML = ` Плэйфер: ${encriptionPlayfair(input.value)}`
-  Shennon.innerHTML = ` Шеннон: ${encriptionShennon(input.value)}`
+  // Shennon.innerHTML = ` Шеннон: ${encriptionShennon(input.value)}`
+  verticalPermutation.innerHTML = ` Вертикальная перестановка: ${encryptionVerticalPermutation(input.value)}`
 }
 
 input.oninput = inputHandler
@@ -143,13 +144,13 @@ const encryptPlayfair = text => {
     }
 
     const binaryEqualsCode = firstCharIndex.map((item, index) => { // Создаем двоичный код равенства
-      return item === secondCharIndex[index]         // Например массив [true, false] === '10'
-    }) 
+      return item === secondCharIndex[index] // Например массив [true, false] === '10'
+    })
 
     //Тут мы преобразуем код равентва в двоичную систему,
     //Затем парсим в десятичную и вызываем функцию из массива, который получен 
     //из объекта с равенствами
-    return Object.values(equalsMethods)[parseInt(binaryEqualsCode.reduce((p, c) => p + +c, ''),2)]() 
+    return Object.values(equalsMethods)[parseInt(binaryEqualsCode.reduce((p, c) => p + +c, ''), 2)]()
   }
 
   let result = ''
@@ -167,15 +168,69 @@ const encryptPlayfair = text => {
 
 // Шифр Шеннона
 
-const shennonEncryptRule = (text) => {
+const shennonEncryptRule = text => {
   const m = text.split('').map(char => ALPHABET.indexOf(char)) //Создаем последовательнсть символов текста
 
   const k = m.map(m => Math.floor(Math.random() * ALPHABET.length)) //Создаем шифрующую последовательность длины равной m.
 
   return m.map((m, index) => ALPHABET[m ^ k[index]]).join('') //Выполняем операцию исключающего ИЛИ (m XOR k). И возвращаем результат
-} 
+}
+
+// Вертикальная перестановка 
+
+const verticalPermutationEncryptRule = text => {
+  const matrix = []
+
+  const rowLength = 7
+
+  const addVoidSymbols = (text, rowLength) => {
+    if (text.length % rowLength !== 0) {
+      return addVoidSymbols(text + '_', rowLength)
+    }
+
+    return text
+  }
+
+  const proccessedText = addVoidSymbols(text, rowLength)
+  const columnLength = Math.ceil(proccessedText.length / rowLength)
+
+
+  for (let i = 0; i < columnLength; i++) {
+    if (i % 2 === 0) {
+      matrix[i] = proccessedText.slice(i * rowLength, rowLength * (i + 1)).split('')
+    } else {
+      matrix[i] = proccessedText.slice(i * rowLength, rowLength * (i + 1)).split('').reverse()
+    }
+  }
+  const result = []
+
+  for (let i = rowLength - 1; i >= 0; i--) {
+    let justFlag = true
+
+    if (justFlag) {
+      for (let j = columnLength - 1; j >= 0; j--) {
+        result.push(matrix[j][i])
+        console.log(columnLength)
+      }
+    } else {
+      for (let j = 0; j < columnLength; j++) {
+        // result.push(matrix[j][i])
+      }
+    }
+    justFlag = !justFlag
+  }
+  // console.log(result)
+
+  console.log(matrix)
+  console.log(matrix[0][6])
+
+  return result.join('')
+
+}
 
 // Функции рендера
+
+const encryptionVerticalPermutation = text => compose(verticalPermutationEncryptRule, normalizeText)(text)
 
 const encriptionShennon = text => compose(shennonEncryptRule, normalizeText)(text)
 
